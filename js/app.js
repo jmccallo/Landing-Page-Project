@@ -61,6 +61,8 @@ function activeClass() {
             ? section.classList.add('active')
             : section.classList.remove('active');
     });
+
+    highlightSelectedSection();
 }
 
 // Scroll to anchor ID using scrollTO event
@@ -79,6 +81,33 @@ scrollToTopButton.textContent = "Scroll to Top";
 scrollToTopButton.className = "scroll-to-top";
 document.body.appendChild(scrollToTopButton);
 
+// Function to get the ID of the active section
+function getActiveSectionId() {
+    for (const section of sections) {
+        const rect = section.getBoundingClientRect();
+        if (rect.top >= 0 && rect.bottom <= (window.innerHeight || document.documentElement.clientHeight)) {
+            return section.id;
+        }
+    }
+    return null; // Return null if no section is active
+}
+
+// Function to highlight the selected section in the navbar
+function highlightSelectedSection() {
+    const activeSectionId = getActiveSectionId();
+    if (activeSectionId) {
+        const navItem = document.querySelector(`a[href="#${activeSectionId}"]`);
+        if (navItem) {
+            // Remove any existing 'active' class from all navigation items
+            document.querySelectorAll('#navbar__list a').forEach(item => item.classList.remove('active'));
+
+            // Add the 'active' class to the selected navigation item
+            navItem.classList.add('active');
+        }
+    }
+}
+
+highlightSelectedSection();
 /**
  * End Main Functions
  * Begin Events
@@ -115,6 +144,10 @@ scrollToTopButton.addEventListener("click", function () {
         behavior: "smooth"
     });
 });
+
+/**
+ * End Events
+ */
 
 /**
  * End Events
