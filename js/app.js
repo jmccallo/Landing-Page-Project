@@ -51,6 +51,7 @@ function activeBox(section) {
         document.getElementById('navbar__list').appendChild(navFragment);
     }
     buildNav();
+    highlightSelectedSection();
 })();
 
 // Add class 'active' to section when near top of viewport
@@ -96,18 +97,23 @@ function getActiveSectionId() {
 function highlightSelectedSection() {
     const activeSectionId = getActiveSectionId();
     if (activeSectionId) {
-        const navItem = document.querySelector(`a[href="#${activeSectionId}"]`);
-        if (navItem) {
-            // Remove any existing 'active' class from all navigation items
-            document.querySelectorAll('#navbar__list a').forEach(item => item.classList.remove('active'));
+        // Loop through all navigation items
+        naviLinks.forEach(link => {
+            // Get the section ID associated with the navigation item
+            const sectionId = link.getAttribute('href').slice(1);
+            const navItem = document.querySelector(`a[href="#${activeSectionId}"]`);
 
-            // Add the 'active' class to the selected navigation item
-            navItem.classList.add('active');
-        }
+            if (sectionId === activeSectionId) {
+                // Add any the 'nav-active' class to the selected navigation item
+                navItem.classList.add('nav-active');
+            } else {
+                // Remove any existing 'nav-active' class from navigation items
+                navItem.classList.remove('nav-active');
+            }
+        });
     }
 }
 
-highlightSelectedSection();
 /**
  * End Main Functions
  * Begin Events
@@ -117,7 +123,10 @@ highlightSelectedSection();
 // Scroll to section on link click
 const naviLinks = document.querySelectorAll('#navbar__list a[href^="#"]');
 naviLinks.forEach(link => {
-    link.addEventListener('click', scrollTo);
+    link.addEventListener('click', (event) =>{
+        event.preventDefault();
+        scrollTo.call(link, event);
+    });
 });
 
 // Set sections as active
@@ -144,10 +153,6 @@ scrollToTopButton.addEventListener("click", function () {
         behavior: "smooth"
     });
 });
-
-/**
- * End Events
- */
 
 /**
  * End Events
