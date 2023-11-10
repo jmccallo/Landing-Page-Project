@@ -62,7 +62,6 @@ function handleScroll() {
 
     sections.forEach(section => {
         const rect = section.getBoundingClientRect();
-        console.log(`Section ${section.id}: ${rect.top}, ${rect.bottom}`);
 
         if (rect.top <= window.innerHeight / 2 && rect.bottom >= window.innerHeight / 2) {
             section.classList.add('active');
@@ -71,9 +70,6 @@ function handleScroll() {
             section.classList.remove('active');
         }
     });
-
-
-    console.log('Active Section ID:', activeSectionId);
 
     // Highlight the selected section in the navbar
     document.querySelectorAll('#navbar__list li a').forEach(link => {
