@@ -24,15 +24,13 @@
 */
 const sections = document.querySelectorAll('section');
 const navMenu = document.getElementById('navbar__list');
+
 /**
  * End Global Variables
  * Start Helper Functions
  * 
 */
-function activeBox(section) {
-    const rect = section.getBoundingClientRect();
-    return (rect.top >= 0 && rect.bottom <= (window.innerHeight || document.documentElement.clientHeight));
-}
+
 /**
  * End Helper Functions
  * Begin Main Functions
@@ -45,74 +43,56 @@ function activeBox(section) {
         const navFragment = document.createDocumentFragment();
         sections.forEach((section) => {
             const navItem = document.createElement('li');
-            navItem.innerHTML = `<a href="#${section.id}">${section.dataset.nav}</a>`;
+            const navAnchor = document.createElement('a');
+            navAnchor.textContent = section.dataset.nav;
+            navAnchor.href = `#${section.id}`;
+            navAnchor.classList.add('menu__link');
+            navItem.appendChild(navAnchor);
             navFragment.appendChild(navItem);
         });
         document.getElementById('navbar__list').appendChild(navFragment);
     }
     buildNav();
-    highlightSelectedSection();
 })();
 
 // Add class 'active' to section when near top of viewport
-function activeClass() {
+function handleScroll() {
+    let activeSectionId;
+    let scrollingTimeout;
+
     sections.forEach(section => {
         const rect = section.getBoundingClientRect();
-        rect.top >= 0 && rect.bottom <= (window.innerHeight || document.documentElement.clientHeight)
-            ? section.classList.add('active')
-            : section.classList.remove('active');
+        console.log(`Section ${section.id}: ${rect.top}, ${rect.bottom}`);
+
+        if (rect.top <= window.innerHeight / 2 && rect.bottom >= window.innerHeight / 2) {
+            section.classList.add('active');
+            activeSectionId = section.id;
+        } else {
+            section.classList.remove('active');
+        }
     });
 
-    highlightSelectedSection();
-}
 
-// Scroll to anchor ID using scrollTO event
-function scrollTo(event) {
-    event.preventDefault();
-    const navId = this.getAttribute('href');
-    const sectionId = navId.slice(1);
-    const navSection = document.getElementById(sectionId);
-    navSection.scrollIntoView({ behavior: 'smooth' });
-}
+    console.log('Active Section ID:', activeSectionId);
 
+    // Highlight the selected section in the navbar
+    document.querySelectorAll('#navbar__list li a').forEach(link => {
+        const sectionId = link.getAttribute('href').slice(1);
+        link.classList.toggle('nav-active', sectionId === activeSectionId);
+    });
+
+    // Hide fixed navigation bar while not scrolling
+    clearTimeout(scrollingTimeout);
+    scrollingTimeout = setTimeout(() => {
+        navMenu.classList.add("hidden");
+    }, 1000);
+}
 
 // Create a button element and it to the page
 const scrollToTopButton = document.createElement("button");
 scrollToTopButton.textContent = "Scroll to Top";
 scrollToTopButton.className = "scroll-to-top";
 document.body.appendChild(scrollToTopButton);
-
-// Function to get the ID of the active section
-function getActiveSectionId() {
-    for (const section of sections) {
-        const rect = section.getBoundingClientRect();
-        if (rect.top >= 0 && rect.bottom <= (window.innerHeight || document.documentElement.clientHeight)) {
-            return section.id;
-        }
-    }
-    return null; // Return null if no section is active
-}
-
-// Function to highlight the selected section in the navbar
-function highlightSelectedSection() {
-    const activeSectionId = getActiveSectionId();
-    if (activeSectionId) {
-        // Loop through all navigation items
-        naviLinks.forEach(link => {
-            // Get the section ID associated with the navigation item
-            const sectionId = link.getAttribute('href').slice(1);
-            const navItem = document.querySelector(`a[href="#${activeSectionId}"]`);
-
-            if (sectionId === activeSectionId) {
-                // Add any the 'nav-active' class to the selected navigation item
-                navItem.classList.add('nav-active');
-            } else {
-                // Remove any existing 'nav-active' class from navigation items
-                navItem.classList.remove('nav-active');
-            }
-        });
-    }
-}
 
 /**
  * End Main Functions
@@ -121,39 +101,24 @@ function highlightSelectedSection() {
 */
 
 // Scroll to section on link click
-const naviLinks = document.querySelectorAll('#navbar__list a[href^="#"]');
-naviLinks.forEach(link => {
-    link.addEventListener('click', (event) =>{
+document.querySelectorAll('#navbar__list li a').forEach(link => {
+    link.addEventListener('click', (event) => {
         event.preventDefault();
-        scrollTo.call(link, event);
+        const navId = event.currentTarget.getAttribute('href');
+        const sectionId = navId.slice(1);
+        const navSection = document.getElementById(sectionId);
+        navSection.scrollIntoView({ behavior: 'smooth' });
     });
 });
 
-// Set sections as active
-window.addEventListener('scroll', activeClass);
+// Event listener for handling scroll event
+window.addEventListener('scroll', handleScroll);
 
-
-// Hide fixed navigation bar while not scrolling
-let scrollingTimeout;
-
-document.addEventListener("scroll", function () {
-    // Clears timeout
-    clearTimeout(scrollingTimeout);
-
-    // Sets a 'new' timeout to hide the navigation bar after set amount of time of inactivity
-    scrollingTimeout = setTimeout(() => {
-        navMenu.classList.add("hidden");
-    }, 2000);
+// Event listener for when the 'scroll to top' button is clicked
+scrollToTopButton.addEventListener("click", (event) => {
+    event.preventDefault();
+    window.scrollTo({ top: 0, behavior: "smooth" });
 });
-
-// An event listener for when the 'scroll to top' button is clicked
-scrollToTopButton.addEventListener("click", function () {
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
-});
-
 /**
  * End Events
  */
